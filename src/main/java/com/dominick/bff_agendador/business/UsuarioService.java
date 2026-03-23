@@ -4,15 +4,13 @@ import com.dominick.bff_agendador.business.dto.in.EnderecoDTORequest;
 import com.dominick.bff_agendador.business.dto.in.LoginRequestDTO;
 import com.dominick.bff_agendador.business.dto.in.TelefoneDTORequest;
 import com.dominick.bff_agendador.business.dto.in.UsuarioDTORequest;
-import com.dominick.bff_agendador.business.dto.out.EnderecoDTOResponse;
-import com.dominick.bff_agendador.business.dto.out.TarefasDTOResponse;
-import com.dominick.bff_agendador.business.dto.out.TelefoneDTOResponse;
-import com.dominick.bff_agendador.business.dto.out.UsuarioDTOResponse;
+import com.dominick.bff_agendador.business.dto.out.*;
 import com.dominick.bff_agendador.infrastructure.client.UsuarioClient;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RequiredArgsConstructor
@@ -63,6 +61,10 @@ public class UsuarioService {
 
         return client.cadastraTelefone(dto, token);
 
+    }
+
+    public ViaCepDTOResponse buscarDadosCep(@PathVariable("cep") String cep){
+       return client.buscarDadosCep(cep);
     }
 }
 

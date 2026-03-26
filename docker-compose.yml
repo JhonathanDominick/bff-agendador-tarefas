@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: db_usuario
+    ports:
+      - "5433:5432"
+    networks:
+      - microservices-network
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: db_agendador
+    networks:
+      - microservices-network
+
+  cadastrausuario:
+    build: ../cadastrausuario
+    container_name: cadastrausuario
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/db_usuario
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+    depends_on:
+      - postgres
+    networks:
+      - microservices-network
+
+  agendador-tarefas:
+    build: ../agendador-tarefas
+    container_name: agendador-tarefas
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/db_agendador
+    depends_on:
+      - mongo
+    networks:
+      - microservices-network
+
+  notificacao:
+    build: ../notificacao
+    container_name: notificacao
+    ports:
+      - "8085:8085"
+    networks:
+      - microservices-network
+
+  bff-agendador:
+    build: .
+    container_name: bff-agendador
+    ports:
+      - "8086:8086"
+    environment:
+      - CADASTRAUSUARIO_URL=http://cadastrausuario:8083
+      - AGENDADOR_TAREFAS_URL=http://agendador-tarefas:8081
+      - NOTIFICACAO_URL=http://notificacao:8085
+    depends_on:
+      - cadastrausuario
+      - agendador-tarefas
+      - notificacao
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
